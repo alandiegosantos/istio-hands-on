@@ -1,0 +1,25 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: webapp-route
+spec:
+  hosts:
+  - webapp
+  gateways:
+  - webapp-gateway
+  http:
+  - name: "webapp-routes"
+    match:
+    - uri:
+        prefix: "/"
+    route:
+    - destination:
+        host: webapp
+        subset: v1
+      weight: 25
+    - destination:
+        host: webapp
+        subset: v2
+      weight: 75
+  exportTo: 
+  - "*"

@@ -1,0 +1,37 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: deny-all
+spec:
+  {}
+---
+apiVersion: "security.istio.io/v1beta1"
+kind: "AuthorizationPolicy"
+metadata:
+  name: "webapp-viewer"
+spec:
+  selector:
+    matchLabels:
+      app: webapp
+  action: ALLOW
+  rules:
+  - to:
+    - operation:
+        methods: ["GET"]
+---
+apiVersion: "security.istio.io/v1beta1"
+kind: "AuthorizationPolicy"
+metadata:
+  name: "svc1-viewer"
+spec:
+    selector:
+      matchLabels:
+        app: svc1
+    action: ALLOW
+    rules:
+    - from:
+      - source:
+          principals: ["cluster.local/ns/default/sa/webapp"]
+      to:
+      - operation:
+          methods: ["GET"]

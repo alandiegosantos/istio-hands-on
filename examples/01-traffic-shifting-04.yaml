@@ -1,0 +1,30 @@
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: webapp-destinations
+spec:
+  host: webapp.default.svc.cluster.local
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: webapp-route
+spec:
+  hosts:
+  - webapp
+  gateways:
+  - webapp-gateway
+  http:
+  - name: "webapp-routes"
+    match:
+    - uri:
+        prefix: "/"
+    route:
+    - destination:
+        host: webapp
+  exportTo: 
+  - "*"

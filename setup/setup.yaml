@@ -1,0 +1,416 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dependencies-configmap
+data:
+  webapp-dependencies.yaml: |
+    dependencies:
+    - method: GET
+      path: http://svc1.default.svc.cluster.local/
+    - method: GET
+      path: http://svc2.default.svc.cluster.local/
+
+  svc1-dependencies.yaml: |
+    dependencies:
+    - method: GET
+      path: http://svc3.default.svc.cluster.local/
+   
+  svc2-dependencies.yaml: |
+    dependencies:
+    - method: GET
+      path: http://svc4.default.svc.cluster.local/
+    - method: GET
+      path: http://svc5.default.svc.cluster.local/
+
+  svc3-dependencies.yaml: |
+    dependencies:
+    - method: GET
+      path: http://svc4.default.svc.cluster.local/
+    - method: GET
+      path: http://svc5.default.svc.cluster.local/
+
+  svc4-dependencies.yaml: |
+    dependencies:
+
+  svc5-dependencies.yaml: |
+    dependencies:
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: webapp
+  labels:
+    account: webapp
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: svc1
+  labels:
+    account: svc1
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: svc2
+  labels:
+    account: svc2
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: svc3
+  labels:
+    account: svc3
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: svc4
+  labels:
+    account: svc4
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: svc5
+  labels:
+    account: svc5
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp-v1
+  labels:
+    app: webapp
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webapp
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: webapp
+        version: v1
+    spec:
+      serviceAccountName: webapp
+      containers:
+      - name: webserver
+        image: alandiegosantos/webserver:latest
+        command:
+        - /usr/local/bin/webserver
+        - --conf
+        - /etc/dependencies.yaml
+        - --welcomeMessage
+        - Welcome v1
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+          name: tcp-8080
+        volumeMounts:
+        - mountPath: /etc/dependencies.yaml
+          name: dependencies-volume
+          subPath: dependencies.yaml
+          readOnly: true
+      volumes:
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: webapp-dependencies.yaml
+            path: dependencies.yaml
+          name: dependencies-configmap
+        name: dependencies-volume
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: svc1-v1
+  labels:
+    app: svc1
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+        app: svc1
+        version: v1
+  template:
+    metadata:
+      labels:
+        app: svc1
+        version: v1
+    spec:
+      serviceAccountName: svc1
+      containers:
+      - name: webserver
+        image: alandiegosantos/webserver:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+          name: tcp-8080
+        volumeMounts:
+        - mountPath: /etc/dependencies.yaml
+          name: dependencies-volume
+          subPath: dependencies.yaml
+          readOnly: true
+      volumes:
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: svc1-dependencies.yaml
+            path: dependencies.yaml
+          name: dependencies-configmap
+        name: dependencies-volume
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: svc2-v1
+  labels:
+    app: svc2
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+        app: svc2
+        version: v1
+  template:
+    metadata:
+      labels:
+        app: svc2
+        version: v1
+    spec:
+      serviceAccountName: svc2
+      containers:
+      - name: webserver
+        image: alandiegosantos/webserver:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+          name: tcp-8080
+        volumeMounts:
+        - mountPath: /etc/dependencies.yaml
+          name: dependencies-volume
+          subPath: dependencies.yaml
+          readOnly: true
+      volumes:
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: svc2-dependencies.yaml
+            path: dependencies.yaml
+          name: dependencies-configmap
+        name: dependencies-volume
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: svc3-v1
+  labels:
+    app: svc3
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+        app: svc3
+        version: v1
+  template:
+    metadata:
+      labels:
+        app: svc3
+        version: v1
+    spec:
+      serviceAccountName: svc2
+      containers:
+      - name: webserver
+        image: alandiegosantos/webserver:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+          name: tcp-8080
+        volumeMounts:
+        - mountPath: /etc/dependencies.yaml
+          name: dependencies-volume
+          subPath: dependencies.yaml
+          readOnly: true
+      volumes:
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: svc3-dependencies.yaml
+            path: dependencies.yaml
+          name: dependencies-configmap
+        name: dependencies-volume
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: svc4-v1
+  labels:
+    app: svc4
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+        app: svc4
+        version: v1
+  template:
+    metadata:
+      labels:
+        app: svc4
+        version: v1
+    spec:
+      serviceAccountName: svc4
+      containers:
+      - name: webserver
+        image: alandiegosantos/webserver:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+          name: tcp-8080
+        volumeMounts:
+        - mountPath: /etc/dependencies.yaml
+          name: dependencies-volume
+          subPath: dependencies.yaml
+          readOnly: true
+      volumes:
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: svc4-dependencies.yaml
+            path: dependencies.yaml
+          name: dependencies-configmap
+        name: dependencies-volume
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: svc5-v1
+  labels:
+    app: svc5
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+        app: svc5
+        version: v1
+  template:
+    metadata:
+      labels:
+        app: svc5
+        version: v1
+    spec:
+      serviceAccountName: svc5
+      containers:
+      - name: webserver
+        image: alandiegosantos/webserver:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+          name: tcp-8080
+        volumeMounts:
+        - mountPath: /etc/dependencies.yaml
+          name: dependencies-volume
+          subPath: dependencies.yaml
+          readOnly: true
+      volumes:
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: svc5-dependencies.yaml
+            path: dependencies.yaml
+          name: dependencies-configmap
+        name: dependencies-volume
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webapp
+spec:
+  selector:
+    app: webapp
+  ports:
+    - protocol: TCP
+      name: http
+      port: 80
+      targetPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc1
+spec:
+  selector:
+    app: svc1
+  ports:
+    - protocol: TCP
+      name: http
+      port: 80
+      targetPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc2
+spec:
+  selector:
+    app: svc2
+  ports:
+    - protocol: TCP
+      name: http
+      port: 80
+      targetPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc3
+spec:
+  selector:
+    app: svc3
+  ports:
+    - protocol: TCP
+      name: http
+      port: 80
+      targetPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc4
+spec:
+  selector:
+    app: svc4
+  ports:
+    - protocol: TCP
+      name: http
+      port: 80
+      targetPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc5
+spec:
+  selector:
+    app: svc5
+  ports:
+    - protocol: TCP
+      name: http
+      port: 80
+      targetPort: 8080
+
+

@@ -1,0 +1,22 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: svc3-route
+spec:
+  hosts:
+  - svc3
+  http:
+  - name: "svc3-routes"
+    match:
+    - uri:
+        prefix: "/"
+    fault:
+      delay:
+        fixedDelay: 7s
+        percentage:
+          value: 30
+    route:
+    - destination:
+        host: svc3
+  exportTo: 
+  - "*"

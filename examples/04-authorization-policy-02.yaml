@@ -1,0 +1,72 @@
+apiVersion: "security.istio.io/v1beta1"
+kind: "AuthorizationPolicy"
+metadata:
+  name: "svc2-viewer"
+spec:
+    selector:
+      matchLabels:
+        app: svc2
+    action: ALLOW
+    rules:
+    - from:
+      - source:
+          principals: ["cluster.local/ns/default/sa/webapp"]
+      to:
+      - operation:
+          methods: ["GET"]
+---
+apiVersion: "security.istio.io/v1beta1"
+kind: "AuthorizationPolicy"
+metadata:
+  name: "svc3-viewer"
+spec:
+    selector:
+      matchLabels:
+        app: svc3
+    action: ALLOW
+    rules:
+    - from:
+      - source:
+          principals: ["cluster.local/ns/default/sa/svc1"]
+      to:
+      - operation:
+          methods: ["GET"]
+---
+apiVersion: "security.istio.io/v1beta1"
+kind: "AuthorizationPolicy"
+metadata:
+  name: "svc4-viewer"
+spec:
+    selector:
+      matchLabels:
+        app: svc4
+    action: ALLOW
+    rules:
+    - from:
+      - source:
+          principals: 
+          - "cluster.local/ns/default/sa/svc2"
+          - "cluster.local/ns/default/sa/svc3"
+      to:
+      - operation:
+          methods: ["GET"]
+
+---
+apiVersion: "security.istio.io/v1beta1"
+kind: "AuthorizationPolicy"
+metadata:
+  name: "svc5-viewer"
+spec:
+    selector:
+      matchLabels:
+        app: svc5
+    action: ALLOW
+    rules:
+    - from:
+      - source:
+          principals: 
+          - "cluster.local/ns/default/sa/svc2"
+          - "cluster.local/ns/default/sa/svc3"
+      to:
+      - operation:
+          methods: ["GET"]

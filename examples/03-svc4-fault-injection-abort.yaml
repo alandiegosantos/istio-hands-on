@@ -1,0 +1,22 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: svc4-route
+spec:
+  hosts:
+  - svc4
+  http:
+  - name: "svc4-routes"
+    match:
+    - uri:
+        prefix: "/"
+    fault:
+      abort:
+        httpStatus: 500
+        percentage:
+          value: 10
+    route:
+    - destination:
+        host: svc4
+  exportTo: 
+  - "*"

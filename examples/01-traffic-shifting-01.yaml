@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp-v2
+  labels:
+    app: webapp
+    version: v2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webapp
+      version: v2
+  template:
+    metadata:
+      labels:
+        app: webapp
+        version: v2
+    spec:
+      containers:
+      - name: webserver
+        image: alandiegosantos/webserver:latest
+        command:
+        - /usr/local/bin/webserver
+        - --conf
+        - /etc/dependencies.yaml
+        - --welcomeMessage
+        - Welcome v2
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+          name: tcp-8080
+        volumeMounts:
+        - mountPath: /etc/dependencies.yaml
+          name: dependencies-volume
+          subPath: dependencies.yaml
+          readOnly: true
+      volumes:
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: webapp-dependencies.yaml
+            path: dependencies.yaml
+          name: dependencies-configmap
+        name: dependencies-volume
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: webapp-destinations
+spec:
+  host: webapp.default.svc.cluster.local
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: v2
+    labels:
+      version: v2
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: webapp-route
+spec:
+  hosts:
+  - webapp
+  gateways:
+  - webapp-gateway
+  http:
+  - name: "webapp-routes"
+    match:
+    - uri:
+        prefix: "/"
+    route:
+    - destination:
+        host: webapp
+        subset: v1
+      weight: 100
+    - destination:
+        host: webapp
+        subset: v2
+      weight: 0
+  exportTo: 
+  - "*"
