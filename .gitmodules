@@ -1,0 +1,3 @@
+[submodule "servicemesh-test-tool"]
+	path = servicemesh-test-tool
+	url = https://github.com/alandiegosantos/servicemesh-test-tool
